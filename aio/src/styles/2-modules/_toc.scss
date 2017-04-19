@@ -2,20 +2,26 @@ aio-toc {
   font-size: 13px;
 
   div.embedded {
-    border-left: 4px solid #4285f4;
+    border-left: 10px solid #4285f4;
     overflow-y: visible;
+    padding: 4px 0 0 10px;
   }
 
   .toc-heading {
-    font-size: 110%;
-    font-weight: bold;
+    font-size: 22px;
+    font-weight: 500;
     margin-left: 8px;
     padding-bottom: 8px;
   }
+
   .toc-heading.secondary {
     padding-bottom: 0;
     position: relative;
     top: -8px;
+
+    &:hover {
+      color: $accentblue;
+    }
   }
 
   button.toc-show-all,
@@ -39,8 +45,6 @@ aio-toc {
 
   button.toc-show-all {
     min-width: 34px;
-    position: relative;
-    top: 7px;
   }
 
   button.toc-show-all::after {
@@ -49,6 +53,10 @@ aio-toc {
 
   button.toc-show-all.closed::after {
     content: 'expand_more';
+  }
+
+  button.toc-more-items {
+    top: 10px;
   }
 
   button.toc-more-items::after {
@@ -65,7 +73,7 @@ aio-toc {
     padding: 0 8px;
   }
 
-  ul.toc-list li {
+  div.toc-list li {
     line-height: 16px;
     margin: 0;
 

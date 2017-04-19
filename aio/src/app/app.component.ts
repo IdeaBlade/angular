@@ -11,6 +11,7 @@ import { LocationService } from 'app/shared/location.service';
 import { NavMenuComponent } from 'app/layout/nav-menu/nav-menu.component';
 import { SearchResultsComponent } from 'app/search/search-results/search-results.component';
 import { SwUpdateNotificationsService } from 'app/sw-updates/sw-update-notifications.service';
+import { TocService } from 'app/shared/toc.service';
 
 const sideNavView = 'SideNav';
 
@@ -63,7 +64,8 @@ export class AppComponent implements OnInit {
     private locationService: LocationService,
     private navigationService: NavigationService,
     private swUpdateNotifications: SwUpdateNotificationsService,
-    private titleService: Title
+    private titleService: Title,
+    private tocService: TocService
   ) { }
 
   ngOnInit() {
@@ -117,6 +119,7 @@ export class AppComponent implements OnInit {
     // Scroll after the doc-viewer has finished rendering the new doc
     this.autoScroll();
     this.isStarting = false;
+    this.tocService.setDoc(this.currentDocument, this.docViewer);
   }
 
   @HostListener('window:resize', ['$event.target.innerWidth'])

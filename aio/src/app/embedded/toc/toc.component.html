@@ -1,14 +1,16 @@
 <div *ngIf="hasContent" [class.embedded]="isEmbedded" [class.closed]="isClosed">
-  <div class="toc-heading" [class.secondary]="hasSecondary">
-    Contents
-    <button type="button" (click)="toggle()" *ngIf="hasSecondary"
-      class="toc-show-all material-icons" [class.closed]="isClosed"
+  <div *ngIf="!hasSecondary"class="toc-heading">Contents</div>
+  <div *ngIf="hasSecondary" class="toc-heading secondary"
+      (click)="toggle()"
       title="Expand/collapse contents"
       aria-label="Expand/collapse contents">
-    </button>
+      Contents
+      <button type="button"
+        class="toc-show-all material-icons" [class.closed]="isClosed">
+      </button>
   </div>
 
-  <ul class="toc-list" #toclist></ul>
+  <div class="toc-list" #toclist></div>
 
   <button type="button" (click)="toggle()" *ngIf="hasSecondary"
     class="toc-more-items material-icons" [class.closed]="isClosed"

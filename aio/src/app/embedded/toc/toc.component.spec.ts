@@ -1,33 +1,57 @@
-// TODO: write tests
+// TODO: WRITE TESTS
+
+import { Component } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { DOCUMENT } from '@angular/platform-browser';
 
 import { TocComponent } from './toc.component';
+import { TocService } from 'app/shared/toc.service';
 
 describe('TocComponent', () => {
-  let component: TocComponent;
-  let fixture: ComponentFixture<TocComponent>;
-
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ TocComponent ]
-    })
-    .compileComponents();
-  }));
+  let hostComponent: HostComponent;
+  let fixture: ComponentFixture<HostComponent>;
+  let tocComponent: TocComponent;
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TocComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+    TestBed.configureTestingModule({
+      declarations: [ HostComponent, TocComponent ],
+      providers: [
+        { provide: TocService, useClass: TestTocService }
+      ]
+    });
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+  function testComponent(testFn: () => void) {
+    TestBed.compileComponents()
+      .then(() => {
+        fixture = TestBed.createComponent(HostComponent);
+        hostComponent = fixture.componentInstance;
+        fixture.detectChanges();
+      })
+      .then(testFn);
+  }
+
+  it('should create HostComponent with no TocComponent', async(() => {
+    testComponent(() => {
+      expect(hostComponent).toBeTruthy();
+    });
+  }));
+
 });
 
 //// helpers ////
+@Component({
+  selector: 'aio-host',
+  template: ''
+})
+class HostComponent {}
+
+class TestTocService {
+
+}
+
 // Should have expando buttons with this example
-function getMultiLineExample() {
+function getMultiLineItemExample() {
   return `
     <aio-toc>
     <ul>
@@ -48,11 +72,11 @@ function getMultiLineExample() {
   `;
 }
 
-function getNoLineExample() {
+function getNoLineItemExample() {
   return `<aio-toc><ul></ul></aio-toc>`;
 }
 
-function getOneLineExample() {
+function getOneLineItemExample() {
   return `<aio-toc><ul><li><a href="#somewhere">howdy</a></li></ul></aio-toc>`;
 }
 
