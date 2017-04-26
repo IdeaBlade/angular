@@ -1,11 +1,4 @@
-@title
-NgModules
-
-@intro
-Define application modules with @NgModule.
-
-@description
-
+<h1 class="no-toc">NgModules</h1>
 
 
 **NgModules** help organize an application into cohesive blocks of functionality.
@@ -27,8 +20,6 @@ This page covers NgModules in greater depth.
 
 <!-- CF: See my comment in the "Resolve directive conflicts" section below proposing renaming or reorganizing that section. -->
 
-<aio-toc>
-
 * [Angular modularity](guide/ngmodule#angular-modularity "Add structure to the app with NgModule")
 * [The application root module](guide/ngmodule#root-module "The startup module that every app requires")
 * [Bootstrap the root module](guide/ngmodule#bootstrap "Launch the app in a browser with the root module as the entry point")
@@ -43,8 +34,6 @@ This page covers NgModules in greater depth.
 * [Configure core services with _forRoot_](guide/ngmodule#core-for-root "Configure providers during module import")
 * [Prevent re-import of the _CoreModule_](guide/ngmodule#prevent-reimport "because bad things happen if a lazy loaded module imports Core")
 * [NgModule metadata properties](guide/ngmodule#ngmodule-properties "A technical summary of the @NgModule metadata properties")
-
-</aio-toc>
 
 <!-- CF: This link goes to the top of this page. I would expect it to go to an "NgModule metadata properties"
  section at the end of this page, but that section doesn't exist. -->

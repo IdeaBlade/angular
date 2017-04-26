@@ -1,9 +1,6 @@
-import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
-import { DOCUMENT } from '@angular/platform-browser';
+import { Component,  ElementRef, OnInit } from '@angular/core';
 
-import 'rxjs/add/operator/first';
-
-import { TocService } from 'app/shared/toc.service';
+import { TocItem, TocService } from 'app/shared/toc.service';
 
 @Component({
   selector: 'aio-toc',
@@ -12,80 +9,31 @@ import { TocService } from 'app/shared/toc.service';
 })
 export class TocComponent implements OnInit {
 
-  embedded = true;
-  hasContent = true; // assume it does until we know otherwise
-  hasSecondary = true;
+  hasSecondary = false;
+  hasToc = true;
   isClosed = true;
-  isEmbedded = true;
+  private isEmbedded = false;
   private primaryMax = 4;
-
-  @ViewChild('toclist', {read: ElementRef})
-  tocList: ElementRef;
+  tocList: TocItem[];
 
   constructor(
-    @Inject(DOCUMENT) private document: any,
     private elementRef: ElementRef,
     private tocService: TocService) {
-    const element = this.elementRef.nativeElement;
-    this.embedded = element.getAttribute('embedded') || '';
+    const hostElement = this.elementRef.nativeElement;
+    this.isEmbedded = hostElement.className.indexOf('embedded') !== -1;
   }
 
   ngOnInit() {
-    // The `aioTocContent` property is set by the DocViewer when it builds this component.
-    // It is the original innerHTML of the host element.
-
-    // Security: the aioTocContent comes from the pre-rendered DOM and is considered to be secure
-    const content = this.elementRef.nativeElement.aioTocContent.trim();
-    this.hasContent = !!content;
-
-    if (this.hasContent) {
-      this.setFromContent(content);
-    } else {
-      this.generateToc();
-    }
-  }
-
-  private generateToc() {
-    this.tocService.docReady.first().subscribe(() => {
-      const el = this.tocService.genToc();
-      const anchors = el.getElementsByTagName('a');
-      this.hasContent = anchors.length > 0;
-      if (this.hasContent) {
-        this.setSecondaryAnchors(anchors);
-        this.setTocList(el);
-      }
-    });
-  }
-
-  private setFromContent(content: any) {
-    const el = this.document.createElement('div') as HTMLDivElement;
-    el.innerHTML = content;
-    const anchors = el.getElementsByTagName('a');
-    this.setSecondaryAnchors(anchors);
-    this.setTocList(el);
-  }
-
-  private setSecondaryAnchors(anchors: NodeListOf<HTMLAnchorElement>) {
-    this.hasSecondary = anchors.length > this.primaryMax;
-    for (let i = 0; i < anchors.length; i++) {
-      const a = anchors[i];
-      // todo: fix hrefs if necessary
-      if (i >= this.primaryMax) {
-        // Identify secondary anchors (those after primaryMax); they may be hidden
-        a.classList.add('secondary');
+    const tocList = this.tocList = this.tocService.tocList;
+    const count = tocList.length;
+    this.hasToc = count > 0;
+    if (this.isEmbedded && this.hasToc) {
+      // If TOC is embedded in doc, mark secondary (sometimes hidden) items
+      this.hasSecondary = tocList.length > this.primaryMax;
+      for (let i = this.primaryMax; i < count; i++) {
+        tocList[i].isSecondary = true;
       }
     }
-  }
-
-  private setTocList(el: Element) {
-    setTimeout(() => {
-      // Must wait a tick for `this.tocList`
-      // Worse to use `AfterViewInit` because several bound properties can change
-      // triggering the dreaded "property value changed after checked" error.
-
-      // Security: the aioTocContent comes from the pre-rendered DOM and is considered to be secure
-      this.tocList.nativeElement.appendChild(el);
-    });
   }
 
   toggle() {

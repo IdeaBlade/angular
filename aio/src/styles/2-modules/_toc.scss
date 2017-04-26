@@ -1,11 +1,8 @@
-aio-toc {
+aio-toc > div {
   font-size: 13px;
-
-  div.embedded {
-    border-left: 10px solid #4285f4;
-    overflow-y: visible;
-    padding: 4px 0 0 10px;
-  }
+  border-left: 10px solid #4285f4;
+  overflow-y: visible;
+  padding: 4px 0 0 10px;
 
   .toc-heading {
     font-size: 22px;
@@ -67,13 +64,13 @@ aio-toc {
     content: 'more_horiz';
   }
 
-  ul {
+  ul.toc-list {
     list-style-type: none;
     margin: 0;
     padding: 0 8px;
   }
 
-  div.toc-list li {
+  ul.toc-list li {
     line-height: 16px;
     margin: 0;
 
@@ -86,15 +83,20 @@ aio-toc {
         color: $accentblue;
       }
     }
+
   }
 
-  div.closed a.secondary {
-    display: none;
+  ul.toc-list li.h3 {
+    margin-left: 15px;
   }
 }
 
+aio-toc > div.closed li.secondary {
+    display: none;
+}
+
 @media screen and (max-width: 1200px) {
-  aio-toc div.embedded:not(:empty) {
+  aio-toc.embedded:not(:empty) {
       display: block;
       margin: 20px 0 24px;
   }

@@ -1,61 +1,66 @@
-import { ElementRef, Inject, Injectable } from '@angular/core';
-import { DOCUMENT } from '@angular/platform-browser';
+import { Inject, Injectable } from '@angular/core';
+import { DOCUMENT, DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 import { ReplaySubject } from 'rxjs/ReplaySubject';
 
 import { DocumentContents } from 'app/documents/document.service';
 
+export interface TocItem {
+  content: SafeHtml;
+  href: string;
+  isSecondary?: boolean;
+  level: string;
+  title: string;
+}
+
 @Injectable()
 export class TocService {
-  doc: DocumentContents;
-  docElement: Element;
-  private docReadySubject = new ReplaySubject<DocumentContents>(1);
-  docReady = this.docReadySubject.asObservable();
-  url: string;
+  tocList: TocItem[];
 
-  constructor(@Inject(DOCUMENT) private document: any) { }
+  constructor(@Inject(DOCUMENT) private document: any, private domSanitizer: DomSanitizer) { }
 
-  setDoc(doc: DocumentContents, docElement: ElementRef) {
-    this.doc = doc;
-    this.docElement = docElement.nativeElement;
-    this.url = doc.url || '';
-    this.docReadySubject.next(doc);
-  }
-
-  genToc() {
-    const tocElements = this.document.createElement('ul') as HTMLUListElement;
-    const headings = this.docElement.querySelectorAll('h2,h3');
+  genToc(docElement: Element, docId: string) {
+    const tocList = [];
+    const headings = docElement.querySelectorAll('h2,h3');
     const idMap = new Map<string, number>();
-    let currentUl = tocElements;
-    let currentTag = 'h2';
 
     for (let i = 0; i < headings.length; i++) {
       const heading = headings[i] as HTMLHeadingElement;
+      // skip if heading class is 'no-toc'
+      if (/(no-toc|notoc)/i.test(heading.className)) { break; }
+
       const id = this.getId(heading, idMap);
-      const tag = heading.tagName.toLowerCase();
-
-      if (tag !== currentTag) {
-        currentTag = tag;
-        if (tag === 'h2') { // up level to h2
-          currentUl = tocElements;
-        } else { // down level to h3
-          currentUl = this.document.createElement('ul');
-          const li = this.document.createElement('li');
-          li.appendChild(currentUl);
-          tocElements.appendChild(li);
-        }
-      }
-
-      // security: the document which provides this heading content
-      // is always authored by the documentation team and is considered to be safe
-      const li = this.document.createElement('li');
-      const html =  `<a href="${this.url}#${id}" title="${heading.innerText}">${heading.innerHTML}</a>`;
-      li.innerHTML = html;
-      currentUl.appendChild(li);
+      const toc: TocItem = {
+        content: this.extractHeadingSafeHtml(heading),
+        href: `${docId}#${id}`,
+        level: heading.tagName.toLowerCase(),
+        title: heading.innerText,
+      };
+      tocList.push(toc);
     }
-    return tocElements;
+
+    this.tocList = tocList;
   }
 
+  reset() {
+    this.tocList = [];
+  }
+
+  // This bad boy exists only to strip off the anchor link attached to a heading
+  private extractHeadingSafeHtml(heading: HTMLHeadingElement) {
+    const a = this.document.createElement('a') as HTMLAnchorElement;
+    a.innerHTML = heading.innerHTML;
+    const anchorLink = a.querySelector('a .icon-link');
+    if (anchorLink) {
+      a.removeChild(anchorLink.parentElement);
+    }
+    // security: the document element which provides this heading content
+    // is always authored by the documentation team and is considered to be safe
+    return this.domSanitizer.bypassSecurityTrustHtml(a.innerHTML);
+  }
+
+  // Extract the id from the heading; create one if necessary
+  // Is it possible for a heading to lack an id?
   private getId(h: HTMLHeadingElement, idMap: Map<string, number>) {
     let id = h.id;
     if (id) {
@@ -67,6 +72,7 @@ export class TocService {
     }
     return id;
 
+    // Map guards against duplicate id creation.
     function addToMap(key: string) {
       const count = idMap[key] = idMap[key] ? idMap[key] + 1 : 1;
       return count === 1 ? key : `${key}-${count}`;

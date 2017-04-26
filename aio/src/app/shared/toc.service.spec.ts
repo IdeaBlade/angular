@@ -1,7 +1,7 @@
 // TODO: WRITE TESTS
 
-import { ReflectiveInjector } from '@angular/core';
-import { DOCUMENT } from '@angular/platform-browser';
+import { ReflectiveInjector, SecurityContext } from '@angular/core';
+import { DOCUMENT, DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 import { TocService } from './toc.service';
 
@@ -11,8 +11,9 @@ describe('TocService', () => {
 
   beforeEach(() => {
     injector = ReflectiveInjector.resolveAndCreate([
+      { provide: DomSanitizer, useClass: TestDomSanitizer },
+      { provide: DOCUMENT, useValue: document },
       TocService,
-      { provide: DOCUMENT, useValue: document }
     ]);
     tocService = injector.get(TocService);
   });
@@ -21,3 +22,13 @@ describe('TocService', () => {
     expect(tocService).toBeTruthy();
   });
 });
+
+class TestDomSanitizer {
+  bypassSecurityTrustHtml = jasmine.createSpy('bypassSecurityTrustHtml')
+    .and.callFake(html => {
+      return {
+        changingThisBreaksApplicationSecurity: html,
+        getTypeName: () => 'HTML',
+      } as SafeHtml;
+    });
+}

@@ -8,43 +8,58 @@ import { TocComponent } from './toc.component';
 import { TocService } from 'app/shared/toc.service';
 
 describe('TocComponent', () => {
-  let hostComponent: HostComponent;
-  let fixture: ComponentFixture<HostComponent>;
   let tocComponent: TocComponent;
 
-  beforeEach(() => {
+  beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ HostComponent, TocComponent ],
+      declarations: [ HostEmbeddedTocComponent, HostNotEmbeddedTocComponent, TocComponent ],
       providers: [
         { provide: TocService, useClass: TestTocService }
       ]
+    })
+    .compileComponents();
+  }));
+
+  describe('(embedded)', () => {
+    let fixture: ComponentFixture<HostEmbeddedTocComponent>;
+
+    beforeEach(() => {
+        fixture = TestBed.createComponent(HostEmbeddedTocComponent);
+        tocComponent = fixture.debugElement.children[0].componentInstance;
+    });
+
+    it('should create tocComponent', () => {
+      expect(tocComponent).toBeTruthy();
     });
   });
 
-  function testComponent(testFn: () => void) {
-    TestBed.compileComponents()
-      .then(() => {
-        fixture = TestBed.createComponent(HostComponent);
-        hostComponent = fixture.componentInstance;
-        fixture.detectChanges();
-      })
-      .then(testFn);
-  }
+  describe('(not embedded)', () => {
+    let fixture: ComponentFixture<HostNotEmbeddedTocComponent>;
 
-  it('should create HostComponent with no TocComponent', async(() => {
-    testComponent(() => {
-      expect(hostComponent).toBeTruthy();
+    beforeEach(() => {
+        fixture = TestBed.createComponent(HostNotEmbeddedTocComponent);
+        tocComponent = fixture.debugElement.children[0].componentInstance;
     });
-  }));
+
+    it('should create tocComponent', () => {
+      expect(tocComponent).toBeTruthy();
+    });
+  });
 
 });
 
 //// helpers ////
 @Component({
-  selector: 'aio-host',
-  template: ''
+  selector: 'aio-embedded-host',
+  template: '<aio-toc embedded></aio-toc>'
 })
-class HostComponent {}
+class HostEmbeddedTocComponent {}
+
+@Component({
+  selector: 'aio-not-embedded-host',
+  template: '<aio-toc></aio-toc>'
+})
+class HostNotEmbeddedTocComponent {}
 
 class TestTocService {
 
