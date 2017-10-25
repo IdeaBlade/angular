@@ -92,7 +92,7 @@ The server (a [Node Express](https://expressjs.com/) server in _this_ guide's ex
 passes client requests for application pages to Universal's `renderModuleFactory` function. 
 
 The `renderModuleFactory` function takes as inputs a *template* HTML page (usually `index.html`), 
-an Angular *module* containing components, 
+an *NgModule* containing components, 
 and a *route* that determines which components to display.
 
 The route comes from the client's request to the server.
@@ -159,7 +159,7 @@ src/
     index-universal.html     <i>* copy of the app web page template</i>
     ...                      <i>* copies of other asset files</i>
   universal/                 <i>* folder for universal code</i>
-    app-server.module.ts     <i>* server-side application module</i>
+    app-server.module.ts     <i>* server-side NgModule</i>
     server.ts                <i>* express web server</i>
     universal-engine.ts      <i>* express template engine</i>
 bs-config.json               <i>config file for lite server</i>
@@ -213,7 +213,7 @@ You must make a few changes to your application code to support both server-side
 
 #### The root `AppModule`
 
-Open file `src/app/app.module.ts` and find the `BrowserModule` import in the `NgModule` metadata.
+Open file `src/app/app.module.ts` and find the `BrowserModule` import in the `@NgModule` metadata.
 Replace that import with this one:
 
 <code-example path="universal/src/app/app.module.ts" region="browsermodule" title="src/app/app.module.ts (withServerTransition)">
@@ -305,10 +305,12 @@ Add to it the following three universal parts:
 
 {@a app-server-module}
 
-### App server module
+### _AppServerModule_
 
-The app server module class (conventionally named `AppServerModule`) is an Angular module that wraps the application's root module (`AppModule`) so that Universal can mediate between your application and the server.
-`AppServerModule` also tells Angular how to bootstrap your application when running as a Universal app.
+The `AppServerModule` tells Angular how to bootstrap your application when running as a Universal app.
+
+`AppServerModule` is an [NgModule](guide/ngmodule) that wraps the application's root (`AppModule`) 
+so that Universal can mediate between your application and the server.
 
 Create an `app-server.module.ts` file in the `src/universal` directory with the following `AppServerModule` code:
 
@@ -349,10 +351,8 @@ The second parameter is an options object
 
 * `document` is the template for the page to render (typically `index.html`).
 
-
 * `url` is the application route (e.g., `/dashboard`), extracted from the client's request.
 Universal should render the appropriate page for that route.
-
 
 * `extraProviders` are optional Angular dependency injection providers, applicable when running on this server
 
@@ -553,13 +553,10 @@ Certain settings are noteworthy for their difference from the `tsconfig.json` in
 * The `module` property must be **es2015** because
  the transpiled JavaScript will use `import` statements instead of `require()` calls.
 
-
 * Point `"typeRoots"` to `"./node_modules/@types/"`
-
 
 * Set the `files` property (instead of `exclude`) to compile the `app-server.module` before the `universal-engine`,
  for the reason [explained above](#import-app-server-module-factory).
-
 
 * The `angularCompilerOptions` section guides the AOT compiler:
 
@@ -579,19 +576,14 @@ A few observations may clarify some of the choices.
 
 * Webpack walks the dependency graph from the two entry points to find all necessary universal application files.
 
-
 * The `@ngtools/webpack` loader loads and prepares the TypeScript files for compilation.
 
-
 * The `AotPlugin` runs the AOT compiler (`ngc`) over the prepared TypeScript, guided by the `tsconfig.universal.json` you created [above](#universal-typescript-configuration).
-
 
 * The `raw-loader` loads imported CSS and HTML files as strings.
 You may need additional loaders or configuration for other file types.
 
-
 * The compiled output is bundled into `dist/server.js`.
-
 
 * The `CopyWebpackPlugin` copies specific static files from their source locations into the `/dist` folder.
 These files include the universal app's web page template, `index-universal.html`, 
@@ -822,7 +814,6 @@ It also explained some of the key reasons for doing so.
 
 Angular Universal can greatly improve the perceived startup performance of your app.
 The slower the network, the more advantageous it becomes to have Universal display the first page to the user.
-
 
 {@a cannot-find-module}
 
